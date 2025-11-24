@@ -1,0 +1,77 @@
+Setting Up the Besu network:
+	Requirements:
+		1. 4 CPU cores
+		2. 8 Gb memory
+		3. Active internet connection
+		4. Docker and minikube/kubernets with kubectl preinstalled
+	To run the given deployment: ./deploy.sh
+	To remove the deployments: ./remove.sh
+	**In the above case the deployments will run with the private key in the ibft-setup**(Refer besu docs for creating own keys and changing genesis configuration)
+	**if using minikube expose the besu network to the local network using: kubectl port-forward -n besu pod/validator1-0 8545:8545**
+	for monitoring: minikube: minikube dashboard --url
+			besu-network(minikube): get minikube ip using- minikube ip
+						in browser: minikube ip/30030
+			block generation: docker run --rm -p 8081:80 -e APP_NODE_URL=http://localhost:8545 alethio/ethereum-lite-explorer
+			**APP_NODE_URL is the validator 1 url that is exposed locally**
+	Expose the besu network by exposing minikube port to the internet or portforwarding(ngrok was used in the project).
+	
+Deploying Smart Contracts(using remix):
+	Requirements: 
+		1. Metamask
+		2. Network ip
+		3. Network id
+	Open metamask create wallet:
+		go to the network section:
+			add custom network:
+				give network url and chainid and click ok.
+		use the 4 validator keys and private keys in the genesis file to have the 7 accounts of which 3 are prefunded.
+	**private keys are the ones that are outside the pubkey enclosure/the funds should be moved before sharing genesis for creating subsequent nodes for security**
+	deploying contracts:
+		**contracts can be deployed only by validator accounts**
+		move all the smart contracts to remix.(besu uses solidity 7.6)
+		compile smart contracts and store the abi files(to be used in frontend)
+		go to deployment section:
+			Connect remix with metamask
+			configure a validator account in metamask and deploy the contracts one by one in the folloeing order:
+				1. usermanager
+				2. bookmanager(requires usermanager contract address)
+				3. borrowmanager(requires bookmanager and usermanager contract address)
+	Share the deployed contract address as well as the abi files with the frontend.
+
+Frontend:
+	steps:
+
+1. Update the API URL and Contract Address
+
+Navigate to the file: client/src/services/api.js (or similar).
+
+Open the file and update the API base URL
+
+Also, update the smart contract address if applicable, replacing the old one with the new deployed contract address.
+
+
+
+2. Connect MetaMask Wallet
+
+Open your browser and ensure the MetaMask extension is installed.
+
+Add a custom network in MetaMask using the updated blockchain node URL (e.g., http://localhost:8545 or your testnet/mainnet RPC URL).
+
+Switch to this network in MetaMask.
+
+In your app, trigger the wallet connection (e.g., via a “Connect Wallet” button) to link MetaMask.
+
+
+
+3. Start the React Client
+
+Open a terminal and navigate to the client directory.
+
+Run the following command:
+
+npm run start
+
+This will start the React development server, and your DApp will open in the browser.
+	
+
+****Please refer to project documentation for problems faced****
